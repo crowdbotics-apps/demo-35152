@@ -19,7 +19,7 @@ class Subscription(models.Model):
     'Generated Model'
     app = models.ForeignKey("app.App",on_delete=models.CASCADE,related_name="subscription_app",)
     plan = models.ForeignKey("payment.Plan",on_delete=models.CASCADE,related_name="subscription_plan",)
-    active = models.BooleanField()
+    active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True,)
 
     # Demo - after we save this subscription, disable all other subscription that exist for this app
