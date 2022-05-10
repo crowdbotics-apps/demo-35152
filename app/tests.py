@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 from users.models import User
 from app.models import App
@@ -12,25 +12,23 @@ client = Client()
 class AppTest(TestCase):
 
     def setUp(self):
-        user1 = User.objects.create(username="user1")
-        App.objects.create(name="App 1", description="foo", owner=user1)
+        self.user =  User.objects.create(username="user1")
+        self.app = App.objects.create(name="App 1", description="foo", owner=self.user)
         self.free_plan = Plan.objects.create(price=0.0, name="Free", description="Limited Access")
 
         self.valid_payload = {
             "name": "App 2",
             "description": "bar",
-            "owner": user1.id
+            "owner": self.user.id
         }
         self.invalid_payload = {
             "name": "App 2",
-            "owner": user1.id
+            "owner": self.user.id
         }
 
     def test_app_model(self):
-        app1 = App.objects.get(name="App 1")
-        user1 = User.objects.get(username="user1")
-        self.assertEqual(app1.description, "foo")
-        self.assertEqual(app1.owner, user1)
+        self.assertEqual(self.app.description, "foo")
+        self.assertEqual(self.app.owner, self.user)
 
     def test_post_app(self):
         response = client.post(
