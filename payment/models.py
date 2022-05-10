@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from app.models import App
 
 # Demo - add a validator to make sure that the price is >= 0
 def valid_price(value):
