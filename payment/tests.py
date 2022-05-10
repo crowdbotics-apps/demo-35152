@@ -1,7 +1,9 @@
-from django.test import TestCase
-from payment.models import Plan
+import json
+from django.test import TestCase, Client
+from payment.models import Plan, Subscription
 from django.core.exceptions import ValidationError
-
+from app.tests import base_app_setup
+from app.models import App
 # Demo - writing tests
 class PlanTest(TestCase):
     def setUp(self):
@@ -38,3 +40,52 @@ class PlanTest(TestCase):
             pass
 
 
+client = Client()
+class SubscriptionTest(TestCase):
+    def setUp(self):
+        self.user, _, self.plan1 = base_app_setup()
+        self.plan2 = Plan.objects.create(price=10.0, name="Standard", description="Common")
+        self.plan3 = Plan.objects.create(price=25, name="Pro", description="Everything we've got")
+
+        self.valid_app_payload = {
+            "name": "App",
+            "description": "foo",
+            "owner": self.user.id
+        }
+
+    def active_sub_helper(self, count, app):
+        all_subscriptions = Subscription.objects.filter(app=app)
+        self.assertEqual(all_subscriptions.count(), count)
+        actives = [sub.active for sub in all_subscriptions]
+        # This tests that there is only one active
+        self.assertEqual(sum(actives), 1)
+
+
+    def test_creating_subscription_deactivates_others(self):
+        self.assertEqual(Subscription.objects.all().count(), 0)
+        client.post(
+            "/api/v1/app/",
+            data=json.dumps(self.valid_app_payload),
+            content_type="application/json"
+        )
+        app = App.objects.get(name=self.valid_app_payload.get("name"))
+        self.active_sub_helper(1, app)
+
+        client.post(
+            "/api/v1/subscription/",
+            data=json.dumps({
+                "app": app.id,
+                "plan": self.plan1.id
+            }),
+            content_type="application/json"
+        )
+        self.active_sub_helper(2, app)
+        client.post(
+            "/api/v1/subscription/",
+            data=json.dumps({
+                "app": app.id,
+                "plan": self.plan2.id
+            }),
+            content_type="application/json"
+        )
+        self.active_sub_helper(3, app)
