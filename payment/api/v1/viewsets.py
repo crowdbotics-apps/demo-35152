@@ -7,6 +7,7 @@ class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer
     authentication_classes = (authentication.SessionAuthentication, authentication.TokenAuthentication)
     queryset = Plan.objects.all()
+    http_method_names = ["get"] # Demo - only let users read plans (Crowdbotics is responsible for other methods)
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializer
