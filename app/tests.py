@@ -10,7 +10,6 @@ client = Client()
 
 # Demo - writing tests
 class AppTest(TestCase):
-
     def setUp(self):
         self.user =  User.objects.create(username="user1")
         self.app = App.objects.create(name="App 1", description="foo", owner=self.user)

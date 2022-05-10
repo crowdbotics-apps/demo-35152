@@ -15,6 +15,12 @@ class Plan(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=30,decimal_places=2,validators=[valid_price])
 
+    def save(self, *args, **kwargs):
+        # Demo - need to call clean_fields for the validator(s) to run on save
+        self.clean_fields()
+        super(Plan, self).save(*args, **kwargs)
+
+
 class Subscription(models.Model):
     'Generated Model'
     app = models.ForeignKey("app.App",on_delete=models.CASCADE,related_name="subscription_app",)
