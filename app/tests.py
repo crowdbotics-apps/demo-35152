@@ -7,6 +7,7 @@ from rest_framework import status
 import json
 client = Client()
 
+# In a fully-featured service, this setup function would probably get used in a lot of tests
 def base_app_setup():
     user = User.objects.create(username="user1")
     app = App.objects.create(name="App 1", description="foo", owner=user)
@@ -29,6 +30,7 @@ class AppTest(TestCase):
         }
 
     def test_app_model(self):
+        self.assertEqual(self.app.name, "App 1")
         self.assertEqual(self.app.description, "foo")
         self.assertEqual(self.app.owner, self.user)
 
@@ -54,6 +56,7 @@ class AppTest(TestCase):
         self.assertEqual(subscription.plan, self.plan)
 
     def test_post_app_invalid(self):
+        # if we pass in a bad payload, it should 400
         response = client.post(
             "/api/v1/app/",
             data=json.dumps(self.invalid_app_payload),
